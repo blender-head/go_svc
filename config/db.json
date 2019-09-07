@@ -1,0 +1,8 @@
+{
+	"host": "54.254.139.123",
+	"port": "3306",
+	"user": "andre",
+	"password": "12345678",
+	"database": "emenu_burger_project",
+	"charset": "utf-8"
+}

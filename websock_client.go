@@ -13,6 +13,8 @@ import (
 	"time"
 	"strings"
 	"io"
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type OrderMessage struct {
@@ -20,10 +22,22 @@ type OrderMessage struct {
 }
 
 type AppConfig struct {
-	AppVersion string
-	ClientID string
-	ServerUrl string
+	App_Version string
+	Client_Id string
+	Server_Url string
 }
+
+type DBConfig struct {
+	Host		string
+	Port		string
+	User		string
+	Password	string
+	Database	string
+	Charset 	string
+}
+
+var DB *sql.DB
+var db_config DBConfig
 
 var app_config AppConfig
 
@@ -37,13 +51,15 @@ var socket gowebsocket.Socket
 
 func main() {
 
-	InitApp()
-
 	SetupLog()
 
-	client_id = app_config.ClientID
+	InitApp()
 
-	socket = gowebsocket.New(app_config.ServerUrl + base64.StdEncoding.EncodeToString([]byte(client_id))) 
+	InitDB()
+
+	client_id = app_config.Client_Id
+
+	socket = gowebsocket.New(app_config.Server_Url + base64.StdEncoding.EncodeToString([]byte(client_id))) 
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
@@ -94,10 +110,15 @@ func main() {
 				panic(err)
 			}
 
-			fmt.Printf("%#v\n", order_message)
+			//fmt.Printf("%#v\n", order_message)
 
 			order_data_message, _ := order_message.Message[1].(map[string]interface{})
-			log.Println("Processed ORDER ID - " + order_data_message["id"].(string))
+
+			order_id := order_data_message["id"].(string)
+			order_status := order_data_message["status"].(string)
+
+			log.Println("ORDER ID - " + order_id)
+			log.Println("STATUS - " + order_status)
 		}
 	}
   
@@ -130,7 +151,7 @@ func InitApp() {
 
 	config_file, err := os.Open("./config/app.json")
 
-	defer config_file.Close()
+	//defer config_file.Close()
 	
 	if err != nil {
 		log.Fatalf("[openAppConfigErr]: %s\n", err)
@@ -143,10 +164,48 @@ func InitApp() {
 	if err = decoder.Decode(&app_config); err != nil {
 		log.Fatalf("[decodeAppConfigErr]: %s\n", err)
 	}
+
+	//log.Println(app_config)
+}
+
+func InitDB() {
+	//config_path, _ := filepath.Abs("../go_emenu/config/db.json")
+
+	file, err := os.Open("./config/db.json")
+
+	//defer file.Close()
+	
+	if err != nil {
+		log.Fatalf("[openDBConfigErr]: %s\n", err)
+	}
+	
+	decoder := json.NewDecoder(file)
+	
+	db_config = DBConfig{}
+	
+	if err = decoder.Decode(&db_config); err != nil {
+		log.Fatalf("[decodeDBConfigErr]: %s\n", err)
+	}
+
+	conn_detail := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", db_config.User, db_config.Password, db_config.Host, db_config.Port, db_config.Database)
+
+	//db, err_db_connect = sql.Open("mysql", "root:mtu1500@andre@tcp(172.17.0.4:3306)/go_emenu?charset=utf8")
+
+	if DB, err = sql.Open("mysql", conn_detail); err != nil {
+		log.Fatalf("[dbConnErr]: %s\n", err)
+	}
 }
 
 func SetupLog() {
-	log_file, err := os.OpenFile("socket.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if _, err := os.Stat("./logs"); os.IsNotExist(err) {
+    	err := os.Mkdir("./logs", 0755)
+
+	    if err != nil {
+	    	log.Fatalf("error creating log dir: %v", err)
+	    }
+	}
+
+	log_file, err := os.OpenFile("./logs/socket.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
 	//defer log_file.Close()
 
@@ -165,7 +224,7 @@ func Heartbeat() {
   	now := time.Now()
     unixtime := now.Unix()
 
-  	ping_data["doshii"] = map[string]interface{}{"ping":unixtime, "version":"12345"}
+  	ping_data["doshii"] = map[string]interface{}{"ping": unixtime, "version": app_config.App_Version}
 
   	ping_data_json, _ := json.Marshal(ping_data)
     

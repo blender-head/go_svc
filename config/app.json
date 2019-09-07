@@ -1,5 +1,5 @@
 {
-	"AppVersion": "1.0.0",
-	"ClientID": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkb3NoaWkgc2VydmVyIiwic3ViIjp7ImZvciI6IkFwcENsaWVudElkIiwiaWQiOjE1OH0sImV4cCI6MTUzMzg3NzMxOX0.TFmgVw8uNr-U21b9y66SMPkx6RzxW-kP32tQd0jzcvA",
-	"ServerUrl": "wss://sandbox.doshii.co/app/socket?auth="
+	"app_version": "1.0.0",
+	"client_id": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkb3NoaWkgc2VydmVyIiwic3ViIjp7ImZvciI6IkFwcENsaWVudElkIiwiaWQiOjE1OH0sImV4cCI6MTUzMzg3NzMxOX0.TFmgVw8uNr-U21b9y66SMPkx6RzxW-kP32tQd0jzcvA",
+	"server_url": "wss://sandbox.doshii.co/app/socket?auth="
 }
