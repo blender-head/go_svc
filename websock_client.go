@@ -11,6 +11,7 @@ import (
 	"time"
 	"strings"
 	"github.com/blender-head/go_svc/bootstrap"
+	"github.com/blender-head/go_svc/models"
 )
 
 type OrderMessage struct {
@@ -31,7 +32,7 @@ func main() {
 
 	bootstrap.InitApp()
 
-	bootstrap.InitDB()
+	models.InitDB() 
 
 	client_id = bootstrap.AppConfig.Client_Id
 
@@ -90,11 +91,26 @@ func main() {
 
 			order_data_message, _ := order_message.Message[1].(map[string]interface{})
 
-			order_id := order_data_message["id"].(string)
+			doshii_order_id := order_data_message["id"].(string)
 			order_status := order_data_message["status"].(string)
 
-			log.Println("ORDER ID - " + order_id)
+			log.Println("ORDER ID - " + doshii_order_id)
 			log.Println("STATUS - " + order_status)
+
+			go func() {
+				data := models.GetOrderInfo(doshii_order_id)
+
+				if len(data) > 0 {
+					local_order_id := data[0]["order_id"].(int)
+
+					var status int
+
+					if order_status == "accepted" || order_status == "complete" {
+						status = 2
+						models.UpdateOrderStatus(local_order_id, status)
+					}
+				}
+			}()
 		}
 	}
   
