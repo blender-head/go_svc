@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"time"
 	"strings"
+	"strconv"
 	"github.com/blender-head/go_svc/bootstrap"
 	"github.com/blender-head/go_svc/models"
 )
@@ -50,7 +51,13 @@ func main() {
 	socket.OnConnected = func(socket gowebsocket.Socket) {
 		log.Println("Connected to server");
 
-		ticker := time.NewTicker(5 * time.Second)
+		interval, err := strconv.Atoi(bootstrap.AppConfig.Heartbeat_Interval)
+
+		if err != nil {
+			log.Fatalf("error converting heartbeat interval to int: ", err)
+		}
+
+		ticker := time.NewTicker(time.Duration(interval) * time.Second)
 
 		go func() {
 

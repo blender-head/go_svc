@@ -13,6 +13,7 @@ type AppConfigData struct {
 	App_Version string
 	Client_Id string
 	Server_Url string
+	Heartbeat_Interval string
 }
 
 var AppConfig AppConfigData
@@ -30,7 +31,7 @@ func SetupLog() {
     	err := os.Mkdir("." + string(filepath.Separator) + parent_log,0777)
 
 	    if err != nil {
-	    	log.Fatalf("error creating parent log dir: %s\n", err)
+	    	log.Fatalf("error creating parent log dir: ", err)
 	    }
 	}
 
@@ -38,14 +39,14 @@ func SetupLog() {
     	err := os.Mkdir("." + string(filepath.Separator) + parent_log + "/" + dated_logs,0777)
 
 	    if err != nil {
-	    	log.Fatalf("error creating dated log dir: %s\n", err)
+	    	log.Fatalf("error creating dated log dir: ", err)
 	    }
 	}
 
 	log_file, err := os.OpenFile("./" + parent_log + "/" + dated_logs + "/" + log_filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
 	if err != nil {
-	    log.Fatalf("error creating log file: %s\n", err)
+	    log.Fatalf("error creating log file: ", err)
 	}
 	
 	log_writer := io.MultiWriter(os.Stdout, log_file)
