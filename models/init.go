@@ -22,14 +22,10 @@ var DB *sql.DB
 var DBConfig DBConfigData
 
 func InitDB() {
-	//config_path, _ := filepath.Abs("../go_emenu/config/db.json")
-
 	file, err := os.Open("./config/db.json")
 
-	//defer file.Close()
-	
 	if err != nil {
-		log.Fatalf("[openDBConfigErr]: %s\n", err)
+		log.Fatalf("error opening db config file: %s\n", err)
 	}
 	
 	decoder := json.NewDecoder(file)
@@ -37,7 +33,7 @@ func InitDB() {
 	DBConfig = DBConfigData{}
 	
 	if err = decoder.Decode(&DBConfig); err != nil {
-		log.Fatalf("[decodeDBConfigErr]: %s\n", err)
+		log.Fatalf("error decoding db config file: %s\n", err)
 	}
 
 	conn_detail := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", DBConfig.User, DBConfig.Password, DBConfig.Host, DBConfig.Port, DBConfig.Database)
@@ -45,6 +41,6 @@ func InitDB() {
 	//db, err_db_connect = sql.Open("mysql", "root:mtu1500@andre@tcp(172.17.0.4:3306)/go_emenu?charset=utf8")
 
 	if DB, err = sql.Open("mysql", conn_detail); err != nil {
-		log.Fatalf("[dbConnErr]: %s\n", err)
+		log.Fatalf("error connecting to database server: %s\n", err)
 	}
 }

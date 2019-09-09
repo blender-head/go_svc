@@ -26,13 +26,15 @@ var client_id string
 
 var socket gowebsocket.Socket
 
+func init() {
+	bootstrap.SetupLog()
+	bootstrap.InitApp()
+	models.InitDB() 
+}
+
 func main() {
 
-	bootstrap.SetupLog()
-
-	bootstrap.InitApp()
-
-	models.InitDB() 
+	log.Println("Service is started")
 
 	client_id = bootstrap.AppConfig.Client_Id
 
@@ -84,7 +86,7 @@ func main() {
 			err := json.Unmarshal([]byte(message), &order_message)
 			
 			if err != nil {
-				panic(err)
+				log.Fatalf("error decoding order message: %s\n", err)
 			}
 
 			//fmt.Printf("%#v\n", order_message)
@@ -132,7 +134,7 @@ func main() {
   	for {
 		select {
 			case <-interrupt:
-				log.Println("interrupt")
+				log.Println("Service is stopped")
 				socket.Close()
 				return
 		}

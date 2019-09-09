@@ -11,7 +11,7 @@ func GetOrderInfo(sale_no string) ([]map[string]interface{}) {
 	rows, err := DB.Query(`SELECT * FROM order_pos_infos WHERE transaction_order_id = ?`, sale_no)
 
 	if err != nil {
-		log.Fatalf("[AppSettingModel GetAppSettings Err]: %s\n", err)
+		log.Fatalf("Model GetOrderInfo error: %s\n", err)
 	}
 
 	output := make([]map[string]interface{}, 0)
@@ -26,7 +26,7 @@ func GetOrderInfo(sale_no string) ([]map[string]interface{}) {
         err := rows.Scan(&order_id, &transaction_order_id, &table_no, &pax)
 
         if err != nil {
-            log.Fatalf("[AppUiImagesRowScanError]: %s\n", err)
+            log.Fatalf("Model GetOrderInfo scan error: %s\n", err)
         }
 
         content := map[string]interface{}{
@@ -47,6 +47,6 @@ func UpdateOrderStatus(order_id int, status int) {
 	_, err := DB.Exec(`UPDATE orders SET status = ? WHERE id = ?`, status, order_id)
 
 	if err != nil {
-        log.Fatalf("[AppUiImagesRowScanError]: %s\n", err)
+        log.Fatalf("Model UpdateOrderStatus error: %s\n", err)
     }
 }

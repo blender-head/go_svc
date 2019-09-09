@@ -30,26 +30,22 @@ func SetupLog() {
     	err := os.Mkdir("." + string(filepath.Separator) + parent_log,0777)
 
 	    if err != nil {
-	    	log.Fatalf("error creating parent log dir: %v", err)
+	    	log.Fatalf("error creating parent log dir: %s\n", err)
 	    }
 	}
-
-	
 
 	if _, err := os.Stat("./" + parent_log + "/" + dated_logs); os.IsNotExist(err) {
     	err := os.Mkdir("." + string(filepath.Separator) + parent_log + "/" + dated_logs,0777)
 
 	    if err != nil {
-	    	log.Fatalf("error creating dated log dir: %v", err)
+	    	log.Fatalf("error creating dated log dir: %s\n", err)
 	    }
 	}
 
 	log_file, err := os.OpenFile("./" + parent_log + "/" + dated_logs + "/" + log_filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
-	//defer log_file.Close()
-
 	if err != nil {
-	    log.Fatalf("error opening file: %v", err)
+	    log.Fatalf("error creating log file: %s\n", err)
 	}
 	
 	log_writer := io.MultiWriter(os.Stdout, log_file)
@@ -61,10 +57,8 @@ func InitApp() {
 
 	config_file, err := os.Open("./config/app.json")
 
-	//defer config_file.Close()
-	
 	if err != nil {
-		log.Fatalf("[openAppConfigErr]: %s\n", err)
+		log.Fatalf("error opening app config file: %s\n", err)
 	}
 	
 	decoder := json.NewDecoder(config_file)
@@ -72,6 +66,6 @@ func InitApp() {
 	AppConfig = AppConfigData{}
 	
 	if err = decoder.Decode(&AppConfig); err != nil {
-		log.Fatalf("[decodeAppConfigErr]: %s\n", err)
+		log.Fatalf("error decoding app config file: %s\n", err)
 	}
 }
