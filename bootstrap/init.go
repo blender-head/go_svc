@@ -6,6 +6,7 @@ import (
 	"io"
 	"encoding/json"
 	"path/filepath"
+	"time"
 )
 
 type AppConfigData struct {
@@ -17,15 +18,33 @@ type AppConfigData struct {
 var AppConfig AppConfigData
 
 func SetupLog() {
-	if _, err := os.Stat("./logs"); os.IsNotExist(err) {
-    	err := os.Mkdir("." + string(filepath.Separator) + "logs",0777)
+
+	parent_log := "logs"
+
+	t := time.Now()
+	dated_logs := t.Format("2006-01-02")
+
+	log_filename := "socket.log"
+
+	if _, err := os.Stat("./" + parent_log); os.IsNotExist(err) {
+    	err := os.Mkdir("." + string(filepath.Separator) + parent_log,0777)
 
 	    if err != nil {
-	    	log.Fatalf("error creating log dir: %v", err)
+	    	log.Fatalf("error creating parent log dir: %v", err)
 	    }
 	}
 
-	log_file, err := os.OpenFile("./logs/socket.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	
+
+	if _, err := os.Stat("./" + parent_log + "/" + dated_logs); os.IsNotExist(err) {
+    	err := os.Mkdir("." + string(filepath.Separator) + parent_log + "/" + dated_logs,0777)
+
+	    if err != nil {
+	    	log.Fatalf("error creating dated log dir: %v", err)
+	    }
+	}
+
+	log_file, err := os.OpenFile("./" + parent_log + "/" + dated_logs + "/" + log_filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 
 	//defer log_file.Close()
 
