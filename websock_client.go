@@ -106,20 +106,20 @@ func main() {
 			log.Println("ORDER ID - " + doshii_order_id)
 			log.Println("STATUS - " + order_status)
 
-			go func() {
-				data := models.GetOrderInfo(doshii_order_id)
+			if order_status == "accepted" || order_status == "complete" {
 
-				if len(data) > 0 {
-					local_order_id := data[0]["order_id"].(int)
+				go func() {
+					data := models.GetOrderInfo(doshii_order_id)
 
-					var status int
+					if len(data) > 0 {
+						local_order_id := data[0]["order_id"].(int)
 
-					if order_status == "accepted" || order_status == "complete" {
-						status = 2
+						status := 1
 						models.UpdateOrderStatus(local_order_id, status)
 					}
-				}
-			}()
+				}()
+				
+			}
 		}
 	}
   
