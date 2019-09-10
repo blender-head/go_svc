@@ -109,14 +109,19 @@ func main() {
 			if order_status == "accepted" || order_status == "complete" {
 
 				go func() {
+					/*
 					data := models.GetOrderInfo(doshii_order_id)
 
 					if len(data) > 0 {
 						local_order_id := data[0]["order_id"].(int)
 
-						status := 1
-						models.UpdateOrderStatus(local_order_id, status)
+						//status := 1
+						//models.UpdateOrderStatus(local_order_id, status)
+
+						models.UpdateOrderLog(local_order_id, order_status)
 					}
+					*/
+					models.UpdateOrderLog(doshii_order_id, order_status)
 				}()
 				
 			}

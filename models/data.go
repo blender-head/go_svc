@@ -50,3 +50,12 @@ func UpdateOrderStatus(order_id int, status int) {
         log.Fatalf("Model UpdateOrderStatus error: %s\n", err)
     }
 }
+
+func UpdateOrderLog(order_id string, message string) {
+
+    _, err := DB.Exec(`UPDATE order_logs SET message = ? WHERE order_id = ?`, message, order_id)
+
+    if err != nil {
+        log.Fatalf("Model UpdateOrderLog error: %s\n", err)
+    }
+}
