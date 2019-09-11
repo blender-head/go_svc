@@ -24,8 +24,9 @@ type OrderMessage struct {
 //var socket = gowebsocket.New("wss://sandbox.doshii.co/app/socket?auth=" + base64.StdEncoding.EncodeToString([]byte(client_id)))
 
 var client_id string
-
+var server_url string
 var socket gowebsocket.Socket
+var heartbeat_Interval int
 
 func init() {
 	bootstrap.SetupLog()
@@ -38,8 +39,9 @@ func main() {
 	log.Println("Service is started")
 
 	client_id = bootstrap.AppConfig.Client_Id
+	server_url = bootstrap.AppConfig.Server_Url
 
-	socket = gowebsocket.New(bootstrap.AppConfig.Server_Url + base64.StdEncoding.EncodeToString([]byte(client_id))) 
+	socket = gowebsocket.New(server_url + base64.StdEncoding.EncodeToString([]byte(client_id))) 
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
@@ -51,7 +53,9 @@ func main() {
 	socket.OnConnected = func(socket gowebsocket.Socket) {
 		log.Println("Connected to server");
 
-		interval, err := strconv.Atoi(bootstrap.AppConfig.Heartbeat_Interval)
+		heartbeat_interval := bootstrap.AppConfig.Heartbeat_Interval
+
+		interval, err := strconv.Atoi(heartbeat_interval)
 
 		if err != nil {
 			log.Fatalf("error converting heartbeat interval to int: ", err)
@@ -60,18 +64,14 @@ func main() {
 		ticker := time.NewTicker(time.Duration(interval) * time.Second)
 
 		go func() {
-
 			for t := range ticker.C {
 				log.Println("Ping sent at", t)
 				Heartbeat()
 			}
-
 		}()
-	
 	}
   
 	socket.OnTextMessage = func(message string, socket gowebsocket.Socket) {
-		
 		is_pong_message := strings.Contains(message, "pong")
 		is_checkin_message := strings.Contains(message, "checkin_created")
 		is_order_message := strings.Contains(message, "order_created")
@@ -85,7 +85,6 @@ func main() {
 		}
 
 		if is_order_message {
-
 			log.Println("Received ORDER message - " + message)
 
 			order_message := OrderMessage{}
@@ -123,7 +122,6 @@ func main() {
 					*/
 					models.UpdateOrderLog(doshii_order_id, order_status)
 				}()
-				
 			}
 		}
 	}
@@ -159,9 +157,15 @@ func Heartbeat() {
   	now := time.Now()
     unixtime := now.Unix()
 
-  	ping_data["doshii"] = map[string]interface{}{"ping": unixtime, "version": bootstrap.AppConfig.App_Version}
+    app_version := bootstrap.AppConfig.App_Version
 
-  	ping_data_json, _ := json.Marshal(ping_data)
+  	ping_data["doshii"] = map[string]interface{}{"ping": unixtime, "version": app_version}
+
+  	ping_data_json, err := json.Marshal(ping_data)
+
+  	if err != nil {
+  		log.Println("error decoding ping data: ", err)
+  	}
     
     log.Println("Sent PING message - " + string(ping_data_json))
 
