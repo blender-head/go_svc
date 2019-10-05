@@ -73,19 +73,30 @@ func main() {
   
 	socket.OnTextMessage = func(message string, socket gowebsocket.Socket) {
 		is_pong_message := strings.Contains(message, "pong")
-		is_checkin_message := strings.Contains(message, "checkin_created")
-		is_order_message := strings.Contains(message, "order_created")
+		is_checkin_created := strings.Contains(message, "checkin_created")
+		is_order_created := strings.Contains(message, "order_created")
+		is_transaction_created := strings.Contains(message, "transaction_created")
+		is_transaction_updated := strings.Contains(message, "transaction_updated")
+		is_order_updated := strings.Contains(message, "order_updated")
 
 		if is_pong_message {
 			log.Println("Received PONG message - " + message)
 		}
 
-		if is_checkin_message {
-			log.Println("Received CHECK-IN message - " + message)
+		if is_checkin_created {
+			log.Println("Received CHECK-IN CREATED message - " + message)
 		}
 
-		if is_order_message {
-			log.Println("Received ORDER message - " + message)
+		if is_order_created {
+			log.Println("Received ORDER CREATED message - " + message)
+		}
+
+		if is_transaction_created {
+			log.Println("Received TRANSACTION CREATED message - " + message)
+		}
+
+		if is_order_updated {
+			log.Println("Received ORDER UPDATED message - " + message)
 
 			order_message := OrderMessage{}
 
@@ -105,24 +116,22 @@ func main() {
 			log.Println("ORDER ID - " + doshii_order_id)
 			log.Println("STATUS - " + order_status)
 
+			go func() {
+				models.UpdateOrderLog(doshii_order_id, order_status)
+			}()
+
+			/*
 			if order_status == "accepted" || order_status == "complete" {
 
 				go func() {
-					/*
-					data := models.GetOrderInfo(doshii_order_id)
-
-					if len(data) > 0 {
-						local_order_id := data[0]["order_id"].(int)
-
-						//status := 1
-						//models.UpdateOrderStatus(local_order_id, status)
-
-						models.UpdateOrderLog(local_order_id, order_status)
-					}
-					*/
 					models.UpdateOrderLog(doshii_order_id, order_status)
 				}()
 			}
+			*/
+		}
+
+		if is_transaction_updated {
+			log.Println("Received TRANSACTION UPDATE message - " + message)
 		}
 	}
   
