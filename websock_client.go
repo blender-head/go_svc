@@ -132,6 +132,28 @@ func main() {
 
 		if is_transaction_updated {
 			log.Println("Received TRANSACTION UPDATE message - " + message)
+
+			order_message := OrderMessage{}
+
+			err := json.Unmarshal([]byte(message), &order_message)
+			
+			if err != nil {
+				log.Fatalf("error decoding order message: %s\n", err)
+			}
+
+			//fmt.Printf("%#v\n", order_message)
+
+			order_data_message, _ := order_message.Message[1].(map[string]interface{})
+
+			doshii_order_id := order_data_message["id"].(string)
+			order_status := order_data_message["status"].(string)
+
+			log.Println("ORDER ID - " + doshii_order_id)
+			log.Println("STATUS - " + order_status)
+
+			go func() {
+				models.UpdateOrderLog(doshii_order_id, order_status)
+			}()
 		}
 	}
   
