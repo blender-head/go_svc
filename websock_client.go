@@ -145,7 +145,7 @@ func main() {
 
 			order_data_message, _ := order_message.Message[1].(map[string]interface{})
 
-			doshii_order_id := order_data_message["id"].(string)
+			doshii_order_id := order_data_message["orderId"].(string)
 			order_status := order_data_message["status"].(string)
 
 			log.Println("ORDER ID - " + doshii_order_id)
