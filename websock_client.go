@@ -75,9 +75,9 @@ func main() {
 		is_pong_message := strings.Contains(message, "pong")
 		is_checkin_created := strings.Contains(message, "checkin_created")
 		is_order_created := strings.Contains(message, "order_created")
+		is_order_updated := strings.Contains(message, "order_updated")
 		is_transaction_created := strings.Contains(message, "transaction_created")
 		is_transaction_updated := strings.Contains(message, "transaction_updated")
-		is_order_updated := strings.Contains(message, "order_updated")
 
 		if is_pong_message {
 			log.Println("Received PONG message - " + message)
